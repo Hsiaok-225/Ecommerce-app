@@ -1,11 +1,15 @@
 import React from "react";
 import styled from "styled-components";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import { useDispatch, useSelector } from "react-redux";
+import { removeItem, resetCart } from "../redux/reducers/cartSlice";
+import { loadStripe } from "@stripe/stripe-js";
+import { axiosFetch } from "../utils/Web_API";
 
 const CartContainer = styled.div`
   position: absolute;
   right: 20px;
-  top: 80px;
+  top: 60px;
   z-index: 999;
   background-color: white;
   box-sizing: border-box;
@@ -86,34 +90,70 @@ const ButtonPayment = styled.button`
 `;
 
 export default function Cart() {
-  const handlePayment = () => {
-    //
+  const { products } = useSelector((store) => store.cart);
+  console.log(products);
+
+  const totalPrice = () => {
+    let total = 0;
+    products.forEach((item) => {
+      total += item.quantity * item.price;
+    });
+    return total.toFixed(2);
+  };
+
+  const dispatch = useDispatch();
+  const handleRemove = (productId) => {
+    dispatch(
+      removeItem({
+        id: productId,
+      })
+    );
+  };
+
+  const stripePromise = loadStripe(
+    "pk_test_51MLVFQIRJpeJsI77clgUYhE5iAEApWab0R52LCVGpGmVEnxxlLTz458VEaAdL8TY4lKI9tgGkYamv8rFm61ZAdhT009E1YkZeZ"
+  );
+
+  const handlePayment = async () => {
+    try {
+      const stripe = await stripePromise;
+      const res = await axiosFetch.post("/orders", {
+        products,
+      });
+      await stripe.redirectToCheckout({
+        sessionId: res.data.stripeSession.id,
+      });
+    } catch (err) {
+      console.log(err);
+    }
   };
   return (
     <CartContainer>
       <h1>Products in your cart</h1>
-      <ItemBox>
-        <img
-          src={
-            "https://images.pexels.com/photos/837140/pexels-photo-837140.jpeg?auto=compress&cs=tinysrgb&w=1600"
-          }
-          alt=""
-        />
-        <ItemDetail>
-          <h1>title</h1>
-          <p>desc.substring</p>
-          <div>item.quantity x item.price</div>
-        </ItemDetail>
-        <IconBox>
-          <DeleteOutlinedIcon />
-        </IconBox>
-      </ItemBox>
+      {products.map((product) => (
+        <ItemBox key={product.id}>
+          <img
+            src={`${process.env.REACT_APP_API_BASEURL}${product.img}`}
+            alt=""
+          />
+          <ItemDetail>
+            <h1>{product.title}</h1>
+            <p>{product.desc?.substring(0, 10)}</p>
+            <div>
+              ${product.price} x {product.quantity}
+            </div>
+          </ItemDetail>
+          <IconBox onClick={() => handleRemove(product.id)}>
+            <DeleteOutlinedIcon />
+          </IconBox>
+        </ItemBox>
+      ))}
       <TotalBox>
         <span>SUBTOTAL</span>
-        <span>$ totalPrice</span>
+        <span>$ {totalPrice()}</span>
       </TotalBox>
       <ButtonPayment onClick={handlePayment}>PROCEED TO CHECKOUT</ButtonPayment>
-      <span>Reset Cart</span>
+      <span onClick={() => dispatch(resetCart())}>Reset Cart</span>
     </CartContainer>
   );
 }

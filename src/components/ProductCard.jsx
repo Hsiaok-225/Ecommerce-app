@@ -38,22 +38,23 @@ const ImageBox = styled.div`
     font-size: 16px;
     font-weight: 400;
   }
+`;
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
+const ProductImage = styled.div`
+  background: ${(props) => `url(${props.img}) no-repeat top center`};
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  background-size: cover;
+  top: 0;
+  left: 0;
 
-  &:hover {
-    & img:nth-child(2) {
-      z-index: 2;
-    }
+  :hover {
+    background: ${(props) => `url(${props.hoverImg}) no-repeat top center`};
+    background-size: cover;
   }
 `;
+
 const PriceBox = styled.div`
   display: flex;
   gap: 20px;
@@ -69,15 +70,17 @@ const PriceBox = styled.div`
   }
 `;
 
-export default function ProductCard({ productDetail }) {
-  const { id, img, img2, title, isNew, oldPrice, price } = productDetail || {};
+export default function ProductCard({ id, product }) {
+  const { img, imgback, title, isNew, oldPrice, price } = product || {};
   const navigate = useNavigate();
   return (
     <CardContainer onClick={() => navigate(`/product/${id}`)}>
       <ImageBox>
         {isNew && <span>New Season</span>}
-        <img src={img} alt="product" />
-        <img src={img2} alt="product" />
+        <ProductImage
+          img={`${process.env.REACT_APP_API_BASEURL}${img.data.attributes.url}`}
+          hoverImg={`${process.env.REACT_APP_API_BASEURL}${imgback.data.attributes.url}`}
+        />
       </ImageBox>
       <h2>{title}</h2>
       <PriceBox>

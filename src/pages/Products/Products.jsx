@@ -1,6 +1,9 @@
+import { useEffect } from "react";
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import List from "../../components/List";
+import useFetch from "../../hooks/useFetch";
 
 const ProductsContainer = styled.div`
   box-sizing: border-box;
@@ -48,27 +51,47 @@ const RightProductsBox = styled.div`
 `;
 
 export default function Products() {
-  const [maxPrice, setMaxPrice] = useState(0);
-  const [sort, setSort] = useState(null);
+  const categoryId = useParams().id;
+  const [maxPrice, setMaxPrice] = useState(1000);
+  const [sort, setSort] = useState("asc");
+  const [selectedSubCats, setSelectedSubCats] = useState([]);
+
+  // GET SubCategory by categoryId
+  const { data, isLoading, error } = useFetch(
+    `/sub-categories?filters[categories][id][$eq]=${categoryId}`
+  );
+
+  const handleCheckbox = (e) => {
+    const value = e.target.value;
+    const isCheck = e.target.checked;
+
+    isCheck
+      ? setSelectedSubCats([...selectedSubCats, value])
+      : setSelectedSubCats(
+          selectedSubCats.filter((checkboxValue) => checkboxValue !== value)
+        );
+  };
 
   return (
     <ProductsContainer>
       <SideSearch>
+        {/* Sort by categories  */}
         <FilterBox>
           <h2>Product Categories</h2>
-          <InputItem>
-            <input type="checkbox" id="1" value={1} />
-            <label htmlFor="1">Shoes</label>
-          </InputItem>
-          <InputItem>
-            <input type="checkbox" id="2" value={2} />
-            <label htmlFor="2">Skirts</label>
-          </InputItem>
-          <InputItem>
-            <input type="checkbox" id="3" value={3} />
-            <label htmlFor="3">Coats</label>
-          </InputItem>
+          {data?.map((item) => (
+            <InputItem key={item.id}>
+              <input
+                type="checkbox"
+                id={item.id}
+                value={item.id}
+                onChange={handleCheckbox}
+              />
+              <label htmlFor={item.id}>{item.attributes.title}</label>
+            </InputItem>
+          ))}
         </FilterBox>
+
+        {/* Sort by Price 'max' */}
         <FilterBox>
           <h2>Filter by price</h2>
           <InputItem>
@@ -83,6 +106,8 @@ export default function Products() {
             <span>{maxPrice}</span>
           </InputItem>
         </FilterBox>
+
+        {/* Sort by Price 'asc' or 'desc' */}
         <FilterBox>
           <h2>Sort by</h2>
           <InputItem>
@@ -112,7 +137,12 @@ export default function Products() {
           src="https://images.pexels.com/photos/1074535/pexels-photo-1074535.jpeg?auto=compress&cs=tinysrgb&w=1600"
           alt=""
         />
-        <List />
+        <List
+          categoryId={categoryId}
+          maxPrice={maxPrice}
+          sort={sort}
+          subCats={selectedSubCats}
+        />
       </RightProductsBox>
     </ProductsContainer>
   );

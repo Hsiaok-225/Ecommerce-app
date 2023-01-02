@@ -7,17 +7,16 @@ import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import Cart from "./Cart";
+import { useSelector } from "react-redux";
 
 const Container = styled.div`
-  height: 80px;
-  border: 1px solid green;
+  height: 60px;
 `;
 const Wrapper = styled.div`
   padding: 10px 30px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid green;
 `;
 const LeftBox = styled.div`
   display: flex;
@@ -37,6 +36,10 @@ const ItemsBox = styled.div`
   display: flex;
   align-items: center;
   font-size: 18px;
+  font-weight: 500;
+  :hover {
+    color: gray;
+  }
 `;
 const IconsBox = styled.div`
   display: flex;
@@ -64,6 +67,7 @@ const CartIconBox = styled.div`
 `;
 
 export default function Navbar() {
+  const { products } = useSelector((store) => store.cart);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   return (
@@ -106,7 +110,7 @@ export default function Navbar() {
             <FavoriteBorderOutlinedIcon />
             <CartIconBox onClick={() => setIsCartOpen(!isCartOpen)}>
               <ShoppingCartOutlinedIcon />
-              <span>0</span>
+              <span>{products.length}</span>
             </CartIconBox>
           </IconsBox>
         </RightBox>

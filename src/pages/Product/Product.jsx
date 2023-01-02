@@ -4,7 +4,10 @@ import styled from "styled-components";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import BalanceIcon from "@mui/icons-material/Balance";
-
+import { useParams } from "react-router-dom";
+import useFetch from "../../hooks/useFetch";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../redux/reducers/cartSlice";
 const ProductContainer = styled.div`
   box-sizing: border-box;
   padding: 20px 50px;
@@ -126,69 +129,101 @@ const InfoBox = styled.div`
 `;
 
 export default function Product() {
-  const [selectedImg, setSelectedImg] = useState(0);
+  const { id } = useParams();
+  const [selectedImg, setSelectedImg] = useState("img");
   const [quantity, setQuantity] = useState(1);
+  const dispatch = useDispatch();
+
+  const { data, isLoading, error } = useFetch(`/products/${id}?populate=*`);
+
+  console.log(data);
 
   const handleAddtoCart = () => {
-    //
+    dispatch(
+      addToCart({
+        id: data.id,
+        title: data.attributes.title,
+        desc: data.attributes.desc,
+        price: data.attributes.price,
+        img: data.attributes.img.data.attributes.url,
+        quantity,
+      })
+    );
   };
-
-  const images = [
-    "https://images.pexels.com/photos/837140/pexels-photo-837140.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    "https://images.pexels.com/photos/949670/pexels-photo-949670.jpeg?auto=compress&cs=tinysrgb&w=1600",
-  ];
 
   return (
     <ProductContainer>
-      <ImageBox>
-        <MiniImageBox>
-          <img src={images[0]} alt="" onClick={() => setSelectedImg(0)} />
-          <img src={images[1]} alt="" onClick={() => setSelectedImg(1)} />
-        </MiniImageBox>
-        <MainImage>
-          <img src={images[selectedImg]} alt="" />
-        </MainImage>
-      </ImageBox>
-      <ProductInfoBox>
-        <TopInfo>
-          <h1>title </h1>
-          <span>$ price</span>
-          <p>desc</p>
-        </TopInfo>
-        <QuantityBox>
-          <button
-            onClick={() => setQuantity((prev) => (prev === 1 ? 1 : prev - 1))}
-          >
-            -
-          </button>
-          {quantity}
-          <button onClick={() => setQuantity((prev) => prev + 1)}>+</button>
-        </QuantityBox>
-        <button onClick={handleAddtoCart}>
-          <AddShoppingCartIcon /> ADD TO CART
-        </button>
-        <LinkBox>
-          <IconBox>
-            <FavoriteBorderIcon /> ADD TO WISH LIST
-          </IconBox>
-          <IconBox>
-            <BalanceIcon /> ADD TO COMPARE
-          </IconBox>
-        </LinkBox>
-        <InfoBox>
-          <span>Vendor: Polo</span>
-          <span>Product Type: T-Shirt</span>
-          <span>Tag: T-Shirt, Women, Top</span>
-        </InfoBox>
-        <hr />
-        <InfoBox>
-          <span>DESCRIPTION</span>
-          <hr />
-          <span>ADDITIONAL INFORMATION</span>
-          <hr />
-          <span>FAQ</span>
-        </InfoBox>
-      </ProductInfoBox>
+      {isLoading ? (
+        "Loading..."
+      ) : (
+        <>
+          <ImageBox>
+            <MiniImageBox>
+              <img
+                src={`${process.env.REACT_APP_API_BASEURL}${data?.attributes?.img?.data?.attributes?.url}
+                  `}
+                alt=""
+                onClick={() => setSelectedImg("img")}
+              />
+              <img
+                src={`${process.env.REACT_APP_API_BASEURL}${data?.attributes?.imgback?.data?.attributes?.url}
+                  `}
+                alt=""
+                onClick={() => setSelectedImg("imgback")}
+              />
+            </MiniImageBox>
+            <MainImage>
+              <img
+                src={`${process.env.REACT_APP_API_BASEURL}${data?.attributes[selectedImg]?.data?.attributes?.url}
+                  `}
+                alt=""
+              />
+            </MainImage>
+          </ImageBox>
+          <ProductInfoBox>
+            <TopInfo>
+              <h1>{data?.attributes?.title}</h1>
+              <span>$ {data?.attributes?.price}</span>
+              <p>{data?.attributes?.desc}</p>
+            </TopInfo>
+            <QuantityBox>
+              <button
+                onClick={() =>
+                  setQuantity((prev) => (prev === 1 ? 1 : prev - 1))
+                }
+              >
+                -
+              </button>
+              {quantity}
+              <button onClick={() => setQuantity((prev) => prev + 1)}>+</button>
+            </QuantityBox>
+            <button onClick={handleAddtoCart}>
+              <AddShoppingCartIcon /> ADD TO CART
+            </button>
+            <LinkBox>
+              <IconBox>
+                <FavoriteBorderIcon /> ADD TO WISH LIST
+              </IconBox>
+              <IconBox>
+                <BalanceIcon /> ADD TO COMPARE
+              </IconBox>
+            </LinkBox>
+            <InfoBox>
+              <span>Vendor: Polo</span>
+              <span>Product Type: T-Shirt</span>
+              <span>Tag: T-Shirt, Women, Top</span>
+            </InfoBox>
+            <hr />
+            <InfoBox>
+              <span>DESCRIPTION</span>
+              <hr />
+              <span>ADDITIONAL INFORMATION</span>
+              <hr />
+              <span>FAQ</span>
+            </InfoBox>
+          </ProductInfoBox>
+        </>
+      )}
     </ProductContainer>
   );
 }

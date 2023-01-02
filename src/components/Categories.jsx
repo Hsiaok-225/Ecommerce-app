@@ -18,6 +18,8 @@ const RowBox = styled.div`
   flex: 1;
   display: flex;
   gap: 10px;
+  position: relative;
+  overflow: hidden;
 `;
 const RightBox = styled.div`
   flex: 2;
@@ -74,6 +76,7 @@ export default function Categories() {
           <button onClick={() => navigate(`/products/1`)}>Women</button>
         </ImageBox>
       </ColBox>
+
       <ColBox>
         <ImageBox>
           <img
@@ -83,6 +86,7 @@ export default function Categories() {
           <button onClick={() => navigate(`/products/1`)}>New Season</button>
         </ImageBox>
       </ColBox>
+
       <RightBox>
         <RowBox>
           <ImageBox>
@@ -92,6 +96,7 @@ export default function Categories() {
             />
             <button onClick={() => navigate(`/products/1`)}>New Season</button>
           </ImageBox>
+
           <ImageBox>
             <img
               src="https://images.pexels.com/photos/1159670/pexels-photo-1159670.jpeg?auto=compress&cs=tinysrgb&w=1600"
@@ -100,6 +105,7 @@ export default function Categories() {
             <button onClick={() => navigate(`/products/1`)}>New Season</button>
           </ImageBox>
         </RowBox>
+
         <ImageBox>
           <img
             src="https://images.pexels.com/photos/1192609/pexels-photo-1192609.jpeg?auto=compress&cs=tinysrgb&w=1600"

@@ -1,6 +1,10 @@
 import styled from "styled-components";
 import ProductCard from "./ProductCard";
 import { tempData } from "../utils/data";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { axiosFetch } from "../utils/Web_API";
+import useFetch from "../hooks/useFetch";
 
 const ProductsContainer = styled.div`
   box-sizing: border-box;
@@ -29,7 +33,10 @@ const BottomBox = styled.div`
 `;
 
 export default function FeaturedProducts({ title }) {
-  const { data, loading, error } = {};
+  const [products, setProducts] = useState(null);
+  const { data, isLoading, error } = useFetch(
+    `/products?populate=*&filters[type][$eq]=${title}`
+  );
 
   return (
     <ProductsContainer>
@@ -44,9 +51,17 @@ export default function FeaturedProducts({ title }) {
         </p>
       </TopBox>
       <BottomBox>
-        {tempData?.map((productDetail) => (
-          <ProductCard key={productDetail.id} productDetail={productDetail} />
-        ))}
+        {error
+          ? "Something went wrong"
+          : isLoading
+          ? "loading..."
+          : data?.map((product) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                product={product.attributes}
+              />
+            ))}
       </BottomBox>
     </ProductsContainer>
   );
