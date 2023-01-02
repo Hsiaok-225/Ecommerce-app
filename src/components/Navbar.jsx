@@ -89,7 +89,7 @@ export default function Navbar() {
           </ItemsBox>
         </LeftBox>
         <CenterBox>
-          <Link to="/">STORE</Link>
+          <Link to="/">ONLINE-STORE</Link>
         </CenterBox>
         <RightBox>
           <ItemsBox>
